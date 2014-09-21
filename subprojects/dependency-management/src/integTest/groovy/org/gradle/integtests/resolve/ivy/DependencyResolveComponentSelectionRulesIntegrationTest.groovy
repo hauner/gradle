@@ -434,7 +434,7 @@ class DependencyResolveComponentSelectionRulesIntegrationTest extends AbstractHt
         expect:
         fails 'resolveConf'
         failureDescriptionStartsWith("A problem occurred evaluating root project")
-        failureHasCause("The closure provided is not valid as a rule action for 'ComponentSelectionRules'.")
+        failureHasCause("The closure provided is not valid as a rule for 'ComponentSelectionRules'.")
         failureHasCause(message)
 
         where:
@@ -677,6 +677,47 @@ class DependencyResolveComponentSelectionRulesIntegrationTest extends AbstractHt
         failure.assertHasLineNumber(18)
         failureHasCause("Could not add a component selection rule for module 'org.utils'.")
         failureHasCause("Cannot convert the provided notation to an object of type ModuleIdentifier: org.utils")
+    }
+
+    def "can provide component selection rule as rule source"() {
+        buildFile << """
+            $baseBuildFile
+
+            dependencies {
+                conf "org.utils:api:1.+"
+            }
+
+            def ruleSource = new Select11()
+
+            configurations.all {
+                resolutionStrategy {
+                    componentSelection {
+                        all ruleSource
+                    }
+                }
+            }
+
+            resolveConf.doLast {
+                def artifacts = configurations.conf.resolvedConfiguration.resolvedArtifacts
+                assert artifacts.size() == 1
+                assert artifacts[0].moduleVersion.id.version == '1.1'
+                assert ruleSource.candidates == ['1.2', '1.1']
+            }
+
+            class Select11 {
+                def candidates = []
+
+                @org.gradle.model.Mutate
+                void select(ComponentSelection selection) {
+                    if (selection.candidate.version != '1.1') {
+                        selection.reject("not 1.1")
+                    }
+                    candidates << selection.candidate.version
+                }
+            }
+"""
+        expect:
+        succeeds "resolveConf"
     }
 
     def "copies selection rules when configuration is copied" () {

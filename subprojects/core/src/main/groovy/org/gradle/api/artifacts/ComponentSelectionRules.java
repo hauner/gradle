@@ -18,7 +18,6 @@ package org.gradle.api.artifacts;
 
 import groovy.lang.Closure;
 import org.gradle.api.Action;
-import org.gradle.api.RuleAction;
 import org.gradle.api.Incubating;
 import org.gradle.internal.HasInternalProtocol;
 
@@ -72,18 +71,6 @@ public interface ComponentSelectionRules {
      * Adds a component selection rule that will apply to all resolved components.
      *
      * Each rule will receive a {@link ComponentSelection} object as an argument
-     * as well as any other inputs defined in the {@link org.gradle.api.RuleAction}. Allowable values for
-     * {@link org.gradle.api.RuleAction#getInputTypes()} are {@link org.gradle.api.artifacts.ComponentMetadata} and {@link org.gradle.api.artifacts.ivy.IvyModuleDescriptor}.
-     *
-     * @param ruleAction the RuleAction that implements a rule to be applied
-     * @return this
-     */
-    public ComponentSelectionRules all(RuleAction<? super ComponentSelection> ruleAction);
-
-    /**
-     * Adds a component selection rule that will apply to all resolved components.
-     *
-     * Each rule will receive a {@link ComponentSelection} object as an argument
      * as well as any other arguments specified for the closure.
      * Allowable closure arguments are {@link ComponentSelection} (required),
      * {@link org.gradle.api.artifacts.ComponentMetadata} and/or
@@ -93,6 +80,23 @@ public interface ComponentSelectionRules {
      * @return this
      */
     public ComponentSelectionRules all(Closure<?> closure);
+
+    /**
+     * Adds a rule-source backed component selection rule that will apply to all resolved components.
+     *
+     * The ruleSource provides the rule as a rule method annotated with {@link org.gradle.model.Mutate}.
+     *
+     * This rule method:
+     * <ul>
+     *     <li>must return void.</li>
+     *     <li>must have {@link org.gradle.api.artifacts.ComponentSelection} as the first parameter.</li>
+     *     <li>may have additional parameters of type {@link org.gradle.api.artifacts.ComponentMetadata} and/or {@link org.gradle.api.artifacts.ivy.IvyModuleDescriptor}.</li>
+     * </ul>
+     *
+     * @param ruleSource an instance providing a rule implementation
+     * @return this
+     */
+    public ComponentSelectionRules all(Object ruleSource);
 
     /**
      * Adds a component selection rule that will apply to the specified module.
@@ -108,19 +112,6 @@ public interface ComponentSelectionRules {
      * Adds a component selection rule that will apply to the specified module.
      *
      * Each rule will receive a {@link ComponentSelection} object as an argument
-     * as well as any other inputs defined in the {@link org.gradle.api.RuleAction}. Allowable values for
-     * {@link org.gradle.api.RuleAction#getInputTypes()} are {@link org.gradle.api.artifacts.ComponentMetadata} and {@link org.gradle.api.artifacts.ivy.IvyModuleDescriptor}.
-     *
-     * @param id the module to apply this rule to in "group:module" format or as a {@link org.gradle.api.artifacts.ModuleIdentifier}
-     * @param ruleAction the RuleAction that implements a rule to be applied
-     * @return this
-     */
-    public ComponentSelectionRules module(Object id, RuleAction<? super ComponentSelection> ruleAction);
-
-    /**
-     * Adds a component selection rule that will apply to the specified module.
-     *
-     * Each rule will receive a {@link ComponentSelection} object as an argument
      * as well as any other arguments specified for the closure.
      * Allowable closure arguments are {@link ComponentSelection} (required),
      * {@link org.gradle.api.artifacts.ComponentMetadata} and/or
@@ -131,4 +122,22 @@ public interface ComponentSelectionRules {
      * @return this
      */
     public ComponentSelectionRules module(Object id, Closure<?> closure);
+
+    /**
+     * Adds a rule-source backed component selection rule that will apply to the specified module.
+     *
+     * The ruleSource provides the rule as a rule method annotated with {@link org.gradle.model.Mutate}.
+     *
+     * This rule method:
+     * <ul>
+     *     <li>must return void.</li>
+     *     <li>must have {@link org.gradle.api.artifacts.ComponentSelection} as the first parameter.</li>
+     *     <li>may have additional parameters of type {@link org.gradle.api.artifacts.ComponentMetadata} and/or {@link org.gradle.api.artifacts.ivy.IvyModuleDescriptor}.</li>
+     * </ul>
+     *
+     * @param id the module to apply this rule to in "group:module" format or as a {@link org.gradle.api.artifacts.ModuleIdentifier}
+     * @param ruleSource an instance providing a rule implementation
+     * @return this
+     */
+    public ComponentSelectionRules module(Object id, Object ruleSource);
 }

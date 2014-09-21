@@ -326,6 +326,20 @@ class ComponentReplacementIntegrationTest extends AbstractIntegrationSpec {
         expect: resolvedModules 'c'
     }
 
+    def "declared modules coexist with forced versions"() {
+        declaredDependencies 'a', 'b'
+        declaredReplacements 'a->b'
+        buildFile << "configurations.all { resolutionStrategy.force 'org:a:1', 'org:b:1'} "
+        expect: resolvedModules 'b'
+    }
+
+    @Ignore //maybe, as a way to 'clear' any replacements
+    def "allow replacing with self"() {
+        declaredDependencies 'a', 'b', 'c'
+        declaredReplacements 'a->c', 'a->b', 'a->a'
+        expect: resolvedModules 'a', 'b', 'c'
+    }
+
     @Ignore
     def "pulls extra dependency to graph if multiple replacement targets declared"() {
         publishedMavenModules 'c'

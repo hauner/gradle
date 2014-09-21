@@ -48,6 +48,20 @@ strategy.  This allows Gradle to customize component selection without knowing w
 
 See the [userguide section](userguide/dependency_management.html#component_selection_rules) on component selection rules for further information.
 
+### Declaring module replacements (i)
+
+It is now possible to declare that certain module is replaced by some other. For example "com.google.collections:google-collections" is replaced by "com.google.guava:guava".
+Such declaration enables Gradle's conflict resolution to be smarter and avoid having both conflicting modules (e.g. "google-collections" + "guava") in the same classpath / dependency tree.
+This feature makes Gradle much better tool in handling scenarios when "group":"name" coordinates of a library change. There are many examples of such migrations, e.g.
+org.jboss.netty->io.netty, spring->spring-core, etc. Module replacement declarations can ship with corporate Gradle plugins and enable stronger and smarter
+dependency resolution in all Gradle-powered projects in the enterprise. This new incubating feature is described in detail in the [User Guide](userguide/dependency_management.html#sec:module_replacement).
+
+    dependencies {
+        components {
+            module("com.google.collections:google-collections").replacedBy("com.google.guava:guava")
+        }
+    }
+
 ### Sonar Runner plugin improvements
 
 The [Sonar Runner Plugin](userguide/sonar_runner_plugin.html) has been improved to fork the Sonar Runner process.
@@ -231,6 +245,15 @@ Please use `model {}` blocks instead for that purpose, e.g.:
             dependsOn 'someOtherTask' 
         } 
     }
+
+### CodeNarc plugin Groovy version changes
+
+The version of Groovy that the [CodeNarc plugin](userguide/codenarc_plugin.html) uses while analyzing Groovy source code has changed in this Gradle release.
+Previously, the version of Groovy that Gradle ships with was used.
+Now, the version of Groovy that the CodeNarc tool declares as a dependency is used. 
+
+This should have no impact on users of the CodeNarc plugin.
+Upon first use of the CodeNarc plugin with Gradle 2.1, you may see Gradle downloading a Groovy implementation for use with the CodeNarc plugin.
 
 ## External contributions
 
