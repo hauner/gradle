@@ -86,6 +86,13 @@ class SonarRootModel implements SonarModel {
     String gradleVersion
 
     /**
+     * Tells whether to use a generated <tt>sonar.properties</tt> file or if the sonar
+     * properties are passed to the sonar runner on the command line. The property file
+     * is generated into <tt>$project.buildDir/tmp/sonarRunner</tt>. Defaults to <tt>true</tt>.
+     */
+    boolean usePropertiesFile = true
+
+    /**
      * Post-processors for global Sonar properties.
      *
      * @see #withGlobalProperties

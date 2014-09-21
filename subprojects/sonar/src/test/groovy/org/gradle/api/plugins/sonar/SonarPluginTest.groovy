@@ -68,6 +68,7 @@ class SonarPluginTest extends Specification {
         db.username == "sonar"
         db.password == "sonar"
 
+        sonar.usePropertiesFile
         sonar.bootstrapDir instanceof File
         sonar.gradleVersion == project.gradle.gradleVersion
     }

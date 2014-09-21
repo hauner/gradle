@@ -442,4 +442,38 @@ class SonarRunnerPluginTest extends Specification {
         then:
         handleBuilder.classpath.files*.name.contains("sonar-runner-dist-2.4.jar")
     }
+
+    def "does pass properties to sonar using a sonar.properties file" () {
+
+        parentProject.sonarRunner {
+            usePropertiesFile = true
+        }
+
+        when:
+        SonarRunner sonarRunner = parentSonarRunnerTask ()
+        JavaExecHandleBuilder handleBuilder = sonarRunner.prepareExec()
+        def systemProperties = handleBuilder.systemProperties
+
+        File sonarProperties = new File (sonarRunner.temporaryDir, SonarRunner.SONAR_PROPERTIES_FILE)
+        Properties fileProperties = new Properties ()
+        fileProperties.load (sonarProperties.newReader ())
+
+        then:
+        systemProperties['project.settings'] == sonarProperties.absolutePath
+        fileProperties == sonarRunner.sonarProperties
+    }
+
+    def "does pass properties to sonar using the command line" () {
+
+        parentProject.sonarRunner {
+            usePropertiesFile = false
+        }
+
+        when:
+        SonarRunner sonarRunner = parentSonarRunnerTask ()
+        JavaExecHandleBuilder handleBuilder = sonarRunner.prepareExec()
+
+        then:
+        handleBuilder.systemProperties == sonarRunner.sonarProperties
+    }
 }

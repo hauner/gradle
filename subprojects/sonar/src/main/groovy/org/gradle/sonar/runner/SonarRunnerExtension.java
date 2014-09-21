@@ -57,6 +57,7 @@ public class SonarRunnerExtension {
     public static final String SONAR_RUNNER_TASK_NAME = "sonarRunner";
 
     private boolean skipProject;
+    private boolean usePropertiesFile;
     private final ActionBroadcast<SonarProperties> propertiesActions;
 
     public SonarRunnerExtension(ActionBroadcast<SonarProperties> propertiesActions) {
@@ -97,4 +98,11 @@ public class SonarRunnerExtension {
         this.skipProject = skipProject;
     }
 
+    public boolean getUsePropertiesFile () {
+        return usePropertiesFile;
+    }
+
+    public void setUsePropertiesFile (boolean usePropertiesFile) {
+        this.usePropertiesFile = usePropertiesFile;
+    }
 }
