@@ -44,7 +44,9 @@ import org.gradle.sonar.runner.SonarRunnerRootExtension;
 import org.gradle.sonar.runner.tasks.SonarRunner;
 import org.gradle.testing.jacoco.plugins.JacocoPlugin;
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
+import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +65,7 @@ import static org.gradle.util.CollectionUtils.nonEmptyOrNull;
  */
 @Incubating
 public class SonarRunnerPlugin implements Plugin<Project> {
+    private final ToolingModelBuilderRegistry registry;
 
     private static final Predicate<File> FILE_EXISTS = new Predicate<File>() {
         public boolean apply(File input) {
@@ -83,6 +86,11 @@ public class SonarRunnerPlugin implements Plugin<Project> {
 
     private Project targetProject;
 
+    @Inject
+    public SonarRunnerPlugin (ToolingModelBuilderRegistry registry) {
+        this.registry = registry;
+    }
+
     public void apply(Project project) {
         targetProject = project;
 
@@ -99,6 +107,8 @@ public class SonarRunnerPlugin implements Plugin<Project> {
         SonarRunnerRootExtension rootExtension = project.getExtensions().create(SonarRunnerExtension.SONAR_RUNNER_EXTENSION_NAME, SonarRunnerRootExtension.class, actionBroadcast);
         addConfiguration(project, rootExtension);
         rootExtension.setForkOptions(sonarRunnerTask.getForkOptions());
+
+        registry.register (new SonarRunnerModelBuilder ());
     }
 
     private ActionBroadcast<SonarProperties> addBroadcaster(Map<Project, ActionBroadcast<SonarProperties>> actionBroadcastMap, Project project) {

@@ -28,6 +28,8 @@ import org.gradle.sonar.runner.SonarRunnerExtension
 import org.gradle.sonar.runner.SonarRunnerRootExtension
 import org.gradle.sonar.runner.tasks.SonarRunner
 import org.gradle.test.fixtures.file.TestFile
+import org.gradle.tooling.provider.model.ToolingModelBuilder
+import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry
 import org.gradle.util.SetSystemProperties
 import org.gradle.util.TestUtil
 import org.junit.Rule
@@ -441,5 +443,46 @@ class SonarRunnerPluginTest extends Specification {
 
         then:
         handleBuilder.classpath.files*.name.contains("sonar-runner-dist-2.4.jar")
+    }
+
+    def "registers a custom model builder which can build the custom model" () {
+        when:
+        ToolingModelBuilder builder = toolingBuilderRegistry().getBuilder (SonarRunnerModel.name)
+
+        then:
+        builder
+        builder.canBuild (SonarRunnerModel.name)
+    }
+
+    def "provides custom model with properties values if properties are set" () {
+        parentProject.sonarRunner {
+            sonarProperties {
+                property "sonar.projectKey", "key"
+                property "sonar.projectName", "name"
+            }
+        }
+
+        when:
+        ToolingModelBuilder builder = toolingBuilderRegistry().getBuilder (SonarRunnerModel.name)
+        SonarRunnerModel model = (SonarRunnerModel)builder.buildAll("unused", parentProject)
+
+        then:
+        model.projectName == 'name'
+        model.projectKey  == 'key'
+    }
+
+    def "provides custom model with defaults if properties are not set" () {
+        when:
+        ToolingModelBuilder builder = toolingBuilderRegistry().getBuilder (SonarRunnerModel.name)
+        SonarRunnerModel model = (SonarRunnerModel)builder.buildAll("unused", parentProject)
+
+        then:
+        model.projectName == 'parent'
+        model.projectKey  == 'group:parent'
+    }
+
+
+    private ToolingModelBuilderRegistry toolingBuilderRegistry() {
+        parentProject.services.get(ToolingModelBuilderRegistry.class)
     }
 }
